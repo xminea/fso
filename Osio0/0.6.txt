@@ -1,0 +1,14 @@
+selain->palvelin: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
+note over selain:
+Selain lähettää palvelimelle POST tyyppisen pyynnön.
+Pyyntö sisältää JSON-muotoisen uuden muistiinpanon.
+end note
+palvelin-->selain: status 201 (created)
+note over palvelin:
+Palvelin vastaa statuskoodilla 201 created.
+Se ei pyydä uudelleenohjausta, eikä muita
+HTTP-pyyntöjä suoriteta.
+Lomakkeen tietojen lähettämisen hoitaa
+selaimen lataamassa JavaScript-tiedostossa
+määritelty koodi.
+end note
