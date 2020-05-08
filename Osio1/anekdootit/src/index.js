@@ -7,7 +7,6 @@ const App = (props) => {
   const [points, setPoints] = useState(new Array(len + 1).join('0').split('').map(parseFloat));
 
   const copy = [...points];
-  console.log(copy);
 
   const randomize = () => {
     const a = Math.floor(Math.random() * len);
@@ -20,12 +19,17 @@ const App = (props) => {
     return copy;
   };
 
+  const bestIndex = copy.indexOf(Math.max(...copy));
+
   return (
     <div>
-      <h2>{props.anecdotes[selected]}</h2>
-      <h3>has {copy[selected]} votes</h3>
+      <h2>Anecdote of the day</h2>
+      <p>{props.anecdotes[selected]}</p>
+      <p>has {copy[selected]} votes</p>
       <button onClick={() => setPoints(vote())}>vote</button>
       <button onClick={() => setSelected(randomize())}>next anecdote</button>
+      <h2>Anecdote with most votes</h2>
+      <p>{props.anecdotes[bestIndex]}</p>
     </div>
   );
 };
