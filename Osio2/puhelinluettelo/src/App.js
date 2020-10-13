@@ -3,18 +3,28 @@ import Person from './components/Person';
 import PersonForm from './components/PersonForm';
 import Filter from './components/Filter';
 import personsService from './services/persons';
+import Notification from './components/Notification';
+import './index.css';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [newFilter, setNewFilter] = useState('');
+  const [message, setMessage] = useState({ msg: '', color: '' });
 
+  /* useEffect(() => {
+    personsService.getAll().then((response) => {
+      setPersons(response.data);
+    });
+  }, []);
+  */
   useEffect(() => {
     personsService.getAll().then((response) => {
       setPersons(response.data);
     });
   }, []);
+  console.log(persons);
   console.log('render', persons.length, 'persons');
 
   const addName = (event) => {
@@ -31,27 +41,63 @@ const App = () => {
           `${newName} is already added to phonebook, replace the old number with a new one?`
         )
       ) {
-        const id = persons.find((item) => item.name === newName).id;
-        personsService.update(id, newObject).then(() => {
-          const temp = persons.filter((item) => item.name !== newName);
-          setPersons([...temp, newObject]);
-          setNewName('');
-          setNewNumber('');
-        });
+        const person = persons.find((item) => item.name === newName);
+        const changedPerson = { ...person, number: newNumber };
+        personsService
+          .update(person.id, changedPerson)
+          .then(() => {
+            const temp = persons.filter((item) => item.name !== newName);
+            setPersons([...temp, changedPerson]);
+            setNewName('');
+            setNewNumber('');
+            setMessage({
+              msg: `Updated name ${newObject.name} `,
+              color: 'green',
+            });
+            setTimeout(() => {
+              setMessage({ msg: '', color: '' });
+            }, 5000);
+            console.log(persons);
+          })
+          .catch((error) => {
+            setMessage({
+              msg: `Information of ${person.name} has already been removed from the server`,
+              color: 'red',
+            });
+            setTimeout(() => {
+              setMessage({ msg: '', color: '' });
+            }, 5000);
+          });
       }
+      console.log(persons.find((item) => item.name === newObject.name));
     } else {
       personsService.create(newObject).then((response) => {
         setPersons(persons.concat(response.data));
         setNewName('');
         setNewNumber('');
+        setMessage({
+          msg: `Added name ${newObject.name} `,
+          color: 'green',
+        });
+        setTimeout(() => {
+          setMessage({ msg: '', color: '' });
+        }, 5000);
       });
     }
+    console.log(persons);
   };
 
   const removeName = (id, deleteName) => {
     if (window.confirm(`Do you really want to remove ${deleteName.name}`))
       personsService.remove(id, deleteName).then(() => {
         setPersons(persons.filter((person) => person.id !== id));
+        setMessage({
+          msg: `Removed name ${deleteName.name} `,
+          color: 'green',
+        });
+        setTimeout(() => {
+          setMessage({ msg: '', color: '' });
+        }, 5000);
       });
   };
 
@@ -69,6 +115,7 @@ const App = () => {
       person.name.toLowerCase().includes(newFilter) ||
       person.number.toLowerCase().includes(newFilter)
   );
+
   console.log(persons);
   const handleSearch = (event) => {
     setNewFilter(event.target.value.toLowerCase());
@@ -77,6 +124,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Filter handleSearch={handleSearch} />
       <h3>add a new</h3>
       <PersonForm
