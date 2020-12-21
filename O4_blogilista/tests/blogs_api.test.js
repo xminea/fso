@@ -120,6 +120,35 @@ test('note without title is not added', async () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
+test('notes can be deleted', async () => {
+   
+    await api
+        .delete('/api/blogs/5a422a851b54a676234d17f7')
+        .expect(200)
+  
+    const blogsAtEnd = await helper.blogsInDb()
+  
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
+})
+
+test('notes can be edited', async () => {
+    const editedBlog = {
+        title: 'new things',
+        author: 'pekka pouta',
+        url: 'pekkanet.fi',
+        likes: 69
+    }
+    await api
+        .put('/api/blogs/5a422a851b54a676234d17f7')
+        .send(editedBlog)
+        .expect(200)
+  
+    const blogsAtEnd = await helper.blogsInDb()
+  
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+    expect(blogsAtEnd[0].likes).toBe(69)
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })
