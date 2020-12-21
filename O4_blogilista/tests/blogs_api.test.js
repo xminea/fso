@@ -42,7 +42,7 @@ test('a valid blog can be added ', async () => {
         title: 'new things',
         author: 'pekka pouta',
         url: 'pekkanet.fi',
-        likes: '69',
+        likes: 69
     }
   
     await api
@@ -57,20 +57,40 @@ test('a valid blog can be added ', async () => {
 })
 
 test('returns blogs with id field', async () => {
-    const b = await helper.blogsInDb()
+    const blogsAtEnd = await helper.blogsInDb()
 
-
-    expect(b[0].id).toBeDefined()
-    expect(b[1].id).toBeDefined()
-    expect(b[0]._id).toBeUndefined()
-    expect(b[1]._id).toBeUndefined()
+    expect(blogsAtEnd[0].id).toBeDefined()
+    expect(blogsAtEnd[1].id).toBeDefined()
+    expect(blogsAtEnd[0]._id).toBeUndefined()
+    expect(blogsAtEnd[1]._id).toBeUndefined()
 
 })
 
-/*
-test('note without content is not added', async () => {
+
+test('blog without likes can be added and likes are 0', async () => {
+    const newBlog = {
+        title: 'uudet tuulet',
+        author: 'pekka pouta',
+        url: 'pekkanet.fi'
+    }
+  
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+    
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+    expect(blogsAtEnd[blogsAtEnd.length - 1].likes).toBe(0)
+  
+})
+
+test('note without url is not added', async () => {
     const newNote = {
-        author: 'joku'
+        title: 'testi',
+        author: 'joku',
+        likes: 69
     }
   
     await api
@@ -82,7 +102,23 @@ test('note without content is not added', async () => {
   
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
-*/
+
+test('note without title is not added', async () => {
+    const newNote = {
+        author: 'joku',
+        url: 'settei',
+        likes: 69
+    }
+  
+    await api
+        .post('/api/blogs')
+        .send(newNote)
+        .expect(400)
+  
+    const blogsAtEnd = await helper.blogsInDb()
+  
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+})
 
 afterAll(() => {
     mongoose.connection.close()
