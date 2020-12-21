@@ -13,12 +13,6 @@ const App = () => {
   const [newFilter, setNewFilter] = useState('');
   const [message, setMessage] = useState({ msg: '', color: '' });
 
-  /* useEffect(() => {
-    personsService.getAll().then((response) => {
-      setPersons(response.data);
-    });
-  }, []);
-  */
   useEffect(() => {
     personsService.getAll().then((response) => {
       setPersons(response.data);
@@ -61,7 +55,7 @@ const App = () => {
           })
           .catch((error) => {
             setMessage({
-              msg: `Information of ${person.name} has already been removed from the server`,
+              msg: `${error.response.data}`,
               color: 'red',
             });
             setTimeout(() => {
