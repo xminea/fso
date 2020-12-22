@@ -30,7 +30,7 @@ describe('total likes', () => {
     })
 
     test('of a bigger list is calculated right', () => {
-        const result = listHelper.totalLikes(helper.blogs)
+        const result = listHelper.totalLikes(helper.initialBlogs)
         expect(result).toBe(36)
     })
 })
@@ -42,11 +42,11 @@ describe('favorite blog', () => {
     })
 
     test('finds favorite', () => {
-        const result = listHelper.favoriteBlog(helper.blogs)
+        const result = listHelper.favoriteBlog(helper.initialBlogs)
         expect(result).toEqual({
-            author: helper.blogs[2].author,
-            likes: helper.blogs[2].likes,
-            title: helper.blogs[2].title,
+            author: helper.initialBlogs[2].author,
+            likes: helper.initialBlogs[2].likes,
+            title: helper.initialBlogs[2].title,
         })
     })
 })
@@ -57,7 +57,7 @@ describe('most blogs', () => {
         expect(result).toEqual(undefined)
     })
     test('finds correct author and blogs', () => {
-        const result = listHelper.mostBlogs(helper.blogs)
+        const result = listHelper.mostBlogs(helper.initialBlogs)
         expect(result).toEqual({
             author: 'Robert C. Martin',
             blogs: 3,
@@ -71,7 +71,7 @@ describe('most likes', () => {
         expect(result).toEqual(undefined)
     })
     test('finds correct author and likes', () => {
-        const result = listHelper.mostLikes(helper.blogs)
+        const result = listHelper.mostLikes(helper.initialBlogs)
         expect(result).toEqual({
             author: 'Edsger W. Dijkstra',
             likes: 17,

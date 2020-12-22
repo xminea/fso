@@ -1,5 +1,7 @@
 const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
+require('express-async-errors')
 
 blogRouter.get('', async (request, response) => {
     const blogs = await Blog.find({})
@@ -7,11 +9,22 @@ blogRouter.get('', async (request, response) => {
 })
 
 blogRouter.post('', async (request, response) => {
+    const body = request.body
+    const user = await User.findById(body.user.id)
+
     
-    const blog = new Blog(request.body)
-    
+    const blog = new Blog({
+        title: body.title,
+        author: body.author,
+        url: body.url,
+        likes: body.likes,
+        user: user.id
+    })
+
     try {
         const result = await blog.save()
+        user.blogs = user.blogs.concat(result.id)
+        await user.save()
         response.status(201).json(result.toJSON())
     } catch(exception) {
         response.status(400).send('Title or url missing')

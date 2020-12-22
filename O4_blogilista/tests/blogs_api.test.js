@@ -9,18 +9,18 @@ const helper = require('./test_helper')
 
 beforeEach(async () => {
     await Blog.deleteMany({})
-    let noteObject = new Blog(helper.initialBlogs[0])
-    await noteObject.save()
-    noteObject = new Blog(helper.initialBlogs[1])
-    await noteObject.save()
-    noteObject = new Blog(helper.initialBlogs[2])
-    await noteObject.save()
-    noteObject = new Blog(helper.initialBlogs[3])
-    await noteObject.save()
-    noteObject = new Blog(helper.initialBlogs[4])
-    await noteObject.save()
-    noteObject = new Blog(helper.initialBlogs[5])
-    await noteObject.save()
+    let blogObject = new Blog(helper.initialBlogs[0])
+    await blogObject.save()
+    blogObject = new Blog(helper.initialBlogs[1])
+    await blogObject.save()
+    blogObject = new Blog(helper.initialBlogs[2])
+    await blogObject.save()
+    blogObject = new Blog(helper.initialBlogs[3])
+    await blogObject.save()
+    blogObject = new Blog(helper.initialBlogs[4])
+    await blogObject.save()
+    blogObject = new Blog(helper.initialBlogs[5])
+    await blogObject.save()
 })
 
 test('blogs are returned as json', async () => {
@@ -120,7 +120,7 @@ test('note without title is not added', async () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
-test('notes can be deleted', async () => {
+test('blogs can be deleted', async () => {
    
     await api
         .delete('/api/blogs/5a422a851b54a676234d17f7')
@@ -131,7 +131,7 @@ test('notes can be deleted', async () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
 })
 
-test('notes can be edited', async () => {
+test('blogs can be edited', async () => {
     const editedBlog = {
         title: 'new things',
         author: 'pekka pouta',
