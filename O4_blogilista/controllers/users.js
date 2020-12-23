@@ -4,15 +4,9 @@ const User = require('../models/user')
 require('express-async-errors')
 
 usersRouter.get('', async (request, response) => {
-    const users = await User.find({})
-    const map = users.map(user => {
-        return {
-            username: user.username,
-            name: user.name,
-            id: user.id
-        }
-    })
-    response.json(map)
+    const users = await User
+        .find({}).populate('notes', { content: 1, date: 1 })
+    response.json(users.map(u => u.toJSON()))
 })
 
 usersRouter.post('', async (request, response) => {
