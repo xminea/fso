@@ -1,9 +1,8 @@
-POST  http://localhost:3003/api/blogs
+POST  http://localhost:3003/api/blogs/
 Content-Type: application/json
-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1aGE4OCIsImlkIjoiNWZlMjNmMGY0MWY0NGU2N2U0MzVmN2Y0IiwiaWF0IjoxNjA4NjYzMDgzfQ.SWLMRP5AL2S6ng91xch8_Ff2qllEIg84uE4VpvwND1w
 
 {
-  "title": "testi5",
-  "author": "fd",
-  "url": "jotainn",
-  "likes": 21}
+  "title": "iriksen blogi",
+  "author": "iris",
+  "url": "jotain.fi",
+  "likes": 100}

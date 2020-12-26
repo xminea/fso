@@ -4,11 +4,16 @@ const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
 const helper = require('./test_helper')
+const bcrypt = require('bcrypt')
+const User = require('../models/user')
 
 
+let token = null
 
 beforeEach(async () => {
-    await Blog.deleteMany({})
+    await Blog.deleteMany({})    
+    await User.deleteMany({})
+
     let blogObject = new Blog(helper.initialBlogs[0])
     await blogObject.save()
     blogObject = new Blog(helper.initialBlogs[1])
@@ -21,6 +26,18 @@ beforeEach(async () => {
     await blogObject.save()
     blogObject = new Blog(helper.initialBlogs[5])
     await blogObject.save()
+    const password = await bcrypt.hash('salasana', 10)
+    const user = new User({ username: 'root', password })
+    await user.save()
+
+    await api
+        .post('/api/login')
+        .send({ username: 'root', password: 'salasana' })
+        .then((res) => {
+            return (token = res.body.token)
+        })
+
+    return token
 })
 
 test('blogs are returned as json', async () => {
@@ -31,8 +48,7 @@ test('blogs are returned as json', async () => {
 })
 
 test('amount of blogs is correct', async () => {
-    const response = await api.get('/api/blogs')
-  
+    const response = await api.get('/api/blogs')  
     expect(response.body).toHaveLength(helper.initialBlogs.length)
 })
 
@@ -47,6 +63,7 @@ test('a valid blog can be added ', async () => {
   
     await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -76,6 +93,7 @@ test('blog without likes can be added and likes are 0', async () => {
   
     await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -86,8 +104,8 @@ test('blog without likes can be added and likes are 0', async () => {
   
 })
 
-test('note without url is not added', async () => {
-    const newNote = {
+test('blog without url is not added', async () => {
+    const newBlog = {
         title: 'testi',
         author: 'joku',
         likes: 69
@@ -95,7 +113,8 @@ test('note without url is not added', async () => {
   
     await api
         .post('/api/blogs')
-        .send(newNote)
+        .set('Authorization', `Bearer ${token}`)
+        .send(newBlog)
         .expect(400)
   
     const blogsAtEnd = await helper.blogsInDb()
@@ -103,8 +122,8 @@ test('note without url is not added', async () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
-test('note without title is not added', async () => {
-    const newNote = {
+test('blog without title is not added', async () => {
+    const newBlog = {
         author: 'joku',
         url: 'settei',
         likes: 69
@@ -112,7 +131,8 @@ test('note without title is not added', async () => {
   
     await api
         .post('/api/blogs')
-        .send(newNote)
+        .set('Authorization', `Bearer ${token}`)
+        .send(newBlog)
         .expect(400)
   
     const blogsAtEnd = await helper.blogsInDb()
@@ -120,33 +140,66 @@ test('note without title is not added', async () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
-test('blogs can be deleted', async () => {
-   
-    await api
-        .delete('/api/blogs/5a422a851b54a676234d17f7')
-        .expect(200)
-  
-    const blogsAtEnd = await helper.blogsInDb()
-  
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
-})
+describe('deleting a blog', () => {
+    let token = null
+    beforeEach(async () => {
+        await Blog.deleteMany({})
+        await User.deleteMany({})
 
-test('blogs can be edited', async () => {
-    const editedBlog = {
-        title: 'new things',
-        author: 'pekka pouta',
-        url: 'pekkanet.fi',
-        likes: 69
-    }
-    await api
-        .put('/api/blogs/5a422a851b54a676234d17f7')
-        .send(editedBlog)
-        .expect(200)
-  
-    const blogsAtEnd = await helper.blogsInDb()
-  
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
-    expect(blogsAtEnd[0].likes).toBe(69)
+        const password = await bcrypt.hash('salasana', 10)
+        const user = new User({ username: 'Pekka', password })
+        await user.save()
+
+        await api
+            .post('/api/login')
+            .send({ username: 'Pekka', password: 'salasana' })
+            .then((res) => {
+                return (token = res.body.token)
+            })
+
+        const newBlog = {
+            title: 'Päivän sää',
+            author: 'Pekka Pouta',
+            url: 'huut.is',
+        }
+        
+        await api
+            .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        return token
+    })
+
+    test('succeeds when token & id are valid', async () => {
+        const blogsAtStart = await Blog.find({}).populate('user')
+        const blogToDelete = blogsAtStart[0]
+
+        await api
+            .delete(`/api/blogs/${blogToDelete.id}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(204)
+
+        const blogsAtEnd = await Blog.find({}).populate('user')
+        expect(blogsAtStart).toHaveLength(1)
+        expect(blogsAtEnd).toHaveLength(0)
+        expect(blogsAtEnd).toEqual([])
+    })
+
+    test('fails without token', async () => {
+        const blogsAtStart = await Blog.find({}).populate('user')
+        const blogToDelete = blogsAtStart[0]
+
+        await api
+            .delete(`/api/blogs/${blogToDelete.id}`)
+            .expect(401)
+
+        const blogsAtEnd = await Blog.find({}).populate('user')
+        expect(blogsAtEnd).toHaveLength(blogsAtStart.length)
+        expect(blogsAtStart).toEqual(blogsAtEnd)
+    })
 })
 
 afterAll(() => {
