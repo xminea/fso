@@ -1,70 +1,57 @@
-const lodash = require('lodash')
-
-const dummy = (blogs) => {
-    blogs + 1
-    return 1
-}
+const _ = require('lodash')
 
 const totalLikes = (blogs) => {
-    const likes = blogs.map((blog) => blog.likes)
-    return likes.reduce((a, b) => a + b, 0)
+    if ( blogs.length===0) {
+        return 0
+    }
+
+    return blogs.reduce((s, b) => s + b.likes, 0)
 }
 
 const favoriteBlog = (blogs) => {
-    var favorite
-    var likes = 0
-    for (var blog of blogs) {
-        if (blog.likes > likes) {
-            favorite = blog
-            likes = blog.likes
+    if ( blogs.length===0) {
+        return null
+    }
+
+    const withMostVotes = (best, current) => {
+        if ( !best ) {
+            return current
         }
+
+        return best.likes > current.likes ? best : current
     }
-    if (!favorite) {
-        return
-    }
-    return {
-        title: favorite.title,
-        author: favorite.author,
-        likes: favorite.likes,
-    }
+
+    return blogs.reduce(withMostVotes , null)
 }
 
 const mostBlogs = (blogs) => {
-    if (blogs.length === 0) return
+    if ( blogs.length===0) {
+        return null
+    }
 
-    const groupByAuthor = lodash.groupBy(blogs, 'author')
-    const authors = Object.keys(groupByAuthor)
-    const map = authors.map((author) => {
-        return {
-            author: author,
-            blogs: groupByAuthor[author].length,
-        }
-    })
-    const sort = lodash.sortBy(map, lodash.property(['blogs']))
-    return sort[sort.length - 1]
+    const blogsByAuthor = _.toPairs(_.groupBy(blogs, b => b.author))
+    const blockCountByAuthor = blogsByAuthor.map(([author, blogs]) => ({
+        author, 
+        blogs: blogs.length
+    }) ).sort((a1, a2 ) => a2.blogs - a1.blogs)
+
+    return blockCountByAuthor[0]
 }
 
 const mostLikes = (blogs) => {
-    if (blogs.length === 0) return
+    if ( blogs.length===0) {
+        return null
+    }
 
-    const groupByAuthor = lodash.groupBy(blogs, 'author')
-    const authors = Object.keys(groupByAuthor)
-    const map = authors.map((author) => {
-        const likes = groupByAuthor[author].map((blog) => blog.likes).reduce((a, b) => a + b, 0)
-        return {
-            author,
-            likes,
-        }
-    })
+    const blogsByAuthor = _.toPairs(_.groupBy(blogs, b => b.author))
+    const likeCountByAuthor = blogsByAuthor.map(([author, blogs]) => ({
+        author, 
+        likes: blogs.reduce((s, b) => s + b.likes, 0)
+    }) ).sort((a1, a2 ) => a2.likes - a1.likes)
 
-    const sorted = lodash.sortBy(map, lodash.property(['likes']))
-    return sorted[sorted.length - 1]
+    return likeCountByAuthor[0]
 }
 
 module.exports = {
-    dummy,
-    totalLikes,
-    favoriteBlog,
-    mostBlogs,
-    mostLikes,
+    totalLikes, favoriteBlog, mostBlogs, mostLikes
 }
