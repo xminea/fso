@@ -57,7 +57,7 @@ const App = () => {
       .then(returnedBlog => {
         setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
       })
-      .catch(error => {
+      .catch(() => {
         setMessage('Blog was already removed from the server')
         setMessageColor('red')
         setTimeout(() => {
