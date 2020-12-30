@@ -22,21 +22,17 @@ const Blog = ({ blog, username, likeBlog, removeBlog}) => {
   if (visible) {
     return (
       <div style={blogStyle}>
-        {blog.title} <button onClick={() => setVisible(!visible)}>hide</button>
-        <br />
-        {blog.url}
-        <br />
-        {blog.likes} <button onClick = {likeBlog}>like</button>
-        <br />
-        {blog.author}
-        <br />
+        <p>{blog.title} <button onClick={() => setVisible(!visible)}>hide</button></p>
+        <p>{blog.url}</p>
+        <p>{blog.likes} <button onClick = {likeBlog}>like</button></p>
+        <p>{blog.author}</p>
         {removeButton()}
       </div>
     )}
 
   return (
     <div style={blogStyle}>
-      {blog.title} {blog.author} <button onClick={() => setVisible(!visible)}>view</button>
+      <p>{blog.title} {blog.author} <button onClick={() => setVisible(!visible)}>view</button></p>
     </div>
   )
 }
