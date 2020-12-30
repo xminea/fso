@@ -12,9 +12,11 @@ describe('Element Blog', () => {
         url: 'pekkanet.com'
       }
     let component
+    const mockLike = jest.fn()
+
     beforeEach(() => {
         component = render(
-            <Blog blog={blog} />
+            <Blog blog={blog} likeBlog={mockLike} />
         )
     })
       
@@ -34,5 +36,16 @@ describe('Element Blog', () => {
         expect(component.container).toHaveTextContent(blog.url)
         expect(component.container).toHaveTextContent(blog.likes)
         expect(component.container).toHaveTextContent(blog.author)
+    })
+
+    test('when like is pressed twice, like-function is called twice', () => {
+        const viewButton = component.getByText('view')
+
+        fireEvent.click(viewButton)
+        const likeButton = component.getByText('like')
+        fireEvent.click(likeButton)
+        fireEvent.click(likeButton)
+
+        expect(mockLike.mock.calls).toHaveLength(2)
     })
 })
